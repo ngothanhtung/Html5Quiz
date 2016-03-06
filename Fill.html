@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="css/bootstrap-theme.min.css" rel="stylesheet" type="text/css">
+
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/angular.js"></script>
+</head>
+<body style="margin: 10px" class="container container-fluid">
+
+<div id="mainApp" ng-controller="quizController">
+    <table class="table table-">
+        <tr>
+            <td>
+                Question 1:
+            </td>
+            <td>
+                <input class="form-control input-lg" type="text">
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Question 2:
+            </td>
+            <td>
+                <input class="form-control input-lg" type="text">
+            </td>
+        </tr>
+    </table>
+    <div>
+        <button ng-disabled="off()" ng-click="check()" class="btn btn-success">Submit</button>
+    </div>
+    <div class="text-center">
+        <span>
+            Score: {{score}}
+        </span>
+    </div>
+</div>
+<script>
+    var questions = [];
+    $.getJSON("data.json", function(data){
+
+        $.each(data, function(index, item){
+            questions.push({id: 'input' + index, source: item.source, text: ''});
+        });
+
+        $(".input-lg").each(function (index, item) {
+            $(this).data("question", questions[index].source);
+            $(this).attr("ng-model", "questions[" + index + "].text");
+            $(this).attr("id", questions[index].id);
+        });
+
+        // Manual start angular
+        angular.bootstrap($("#mainApp"), ['mainApp']);
+    });
+
+
+    var mainApp = angular.module("mainApp", []);
+    mainApp.controller('quizController', function ($scope) {
+        // questions
+        $scope.questions = questions;
+
+
+        // score
+        $scope.score = 0;
+
+        // check
+        $scope.check = function () {
+            console.log('Check result');
+
+            angular.forEach(questions, function (item, index) {
+                console.log(questions);
+                if (item.text === item.source) {
+                    $scope.score += 1;
+                    $("#" + item.id).css("border-color", "blue");
+                }
+                else {
+                    $("#" + item.id).css("border-color", "red");
+                }
+            });
+        };
+
+        $scope.off = function(){
+            var count = $(".input-lg").filter(function() { return $(this).val() == ""; }).length;
+            console.log(count);
+            console.log(questions.length);
+            return !(count == questions.length);
+
+        }
+    });
+</script>
+</body>
+</html>
